@@ -27,18 +27,39 @@ services:
     container_name: fastapi-backend
     environment:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/computer_use_db
     ports:
       - "8000:8000"    # FastAPI backend
     volumes:
       - ./fastapi_backend:/app
       - /var/run/docker.sock:/var/run/docker.sock
     working_dir: /app
+    depends_on:
+      - postgres
     networks:
       - computer-use-network
     command: >
       bash -c "pip install -r requirements.txt &&
                uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
 
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: computer-use-postgres
+    environment:
+      - POSTGRES_DB=computer_use_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - computer-use-network
+
 networks:
   computer-use-network:
     driver: bridge
+
+volumes:
+  postgres_data:
