@@ -11,10 +11,11 @@ Successfully transformed the experimental Streamlit-based computer use demo into
 - **1 Container** → runs everything (VNC + Streamlit + AI Agent)
 
 ### **New System (Multi-Container):**
-- **1 docker-compose.yml** → orchestrates 2 containers
-- **2 Containers:**
+- **1 docker-compose.yml** → orchestrates 3 containers
+- **3 Containers:**
   - `computer-use-demo` → VNC Desktop + AI Agent (original functionality)
-  - `fastapi-backend` → New REST API + Web Interface
+  - `fastapi-backend` → New REST API + Web Interface + Session Management
+  - `computer-use-postgres` → PostgreSQL Database for persistent storage
 
 ## New System Architecture
 
@@ -30,43 +31,72 @@ Successfully transformed the experimental Streamlit-based computer use demo into
 │  │ • VNC Desktop  │    │ • WebSocket for real-time       │ │
 │  │ • AI Agent     │    │ • HTML/JS Frontend              │ │
 │  │ • Streamlit    │    │ • Docker CLI for VNC control    │ │
-│  │ • Original     │    │ • Port 8000                     │ │
-│  │   functionality│    │                                 │ │
-│  │ • Ports:       │    │                                 │ │
+│  │ • Original     │    │ • Session Management            │ │
+│  │   functionality│    │ • Database Integration          │ │
+│  │ • Ports:       │    │ • Port 8000                     │ │
 │  │   5900,6080,   │    │                                 │ │
 │  │   8080,8501    │    │                                 │ │
 │  └─────────────────┘    └─────────────────────────────────┘ │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │              computer-use-postgres                     │ │
+│  │                                                         │ │
+│  │ • PostgreSQL Database                                  │ │
+│  │ • Persistent Session Storage                           │ │
+│  │ • Chat History & Command Logs                         │ │
+│  │ • Port 5432                                           │ │
+│  └─────────────────────────────────────────────────────────┘ │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 computer-use-demo/
-├── docker-compose.yml          # Main orchestration
+├── docker-compose.yml          # Main orchestration (3 services)
 ├── fastapi_backend/            # FastAPI application
-│   ├── main.py                # Main FastAPI app
+│   ├── main.py                # Main FastAPI app with session management
+│   ├── models.py              # SQLAlchemy database models
+│   ├── database.py            # Database connection & setup
+│   ├── schemas.py             # Pydantic data validation schemas
 │   ├── requirements.txt       # Python dependencies
 │   └── static/                # Frontend files
-│       └── index.html         # Web interface
+│       └── index.html         # Enhanced web interface
 └── README_FASTAPI.md          # This file
 ```
 
 
-## How to Run the NEW FastAPI System
-
-### 1. **Start the System**
+### 1. **Start the Complete System**
 ```bash
+cd computer-use-demo
 docker-compose up -d
 ```
 
-### 2. **Access the Interface**
+### 2. **Verify All Services**
+```bash
+docker-compose ps
+```
+You should see:
+- ✅ `computer-use-demo` - VNC Desktop + AI Agent
+- ✅ `computer-use-postgres` - PostgreSQL Database
+- ✅ `fastapi-backend` - FastAPI + Session Management
+
+### 3. **Access the Enhanced Interface**
 - **FastAPI Frontend**: http://localhost:8000/
 - **VNC Desktop**: http://localhost:6080/
+- **Database**: localhost:5432 (if needed for debugging)
 
-### 3. **Try Commands**
+### 4. **Start Using Enhanced Features**
+
+#### **Create a New Session:**
+1. Click **"🆕 New Session"** button
+2. System generates unique session ID
+3. WebSocket connects automatically
+4. Chat interface becomes active
+
+#### **Execute Commands:**
 Type these in the chat interface:
 - `"open browser"` → Opens Firefox in VNC
 - `"take screenshot"` → Takes real screenshot
