@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Computer Use Agent - Simple Chat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .left-panel {
+            width: 300px;
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-bottom: 1px solid #eee;
+        }
+
+        .vnc-area {
+            height: 400px;
+            background: #000;
+            border: 1px solid #ddd;
+        }
+
+        .header {
+            background: #34495e;
+            color: white;
+            padding: 15px 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .info-panel {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .info-panel h2 {
+            margin-bottom: 15px;
+            color: #3498db;
+        }
+
+        .info-panel p {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #fafafa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            max-width: 80%;
+        }
+
+        .message.user {
+            background: #3498db;
+            color: white;
+            margin-left: auto;
+        }
+
+        .message.assistant {
+            background: #ecf0f1;
+            color: #333;
+        }
+
+        .message.progress {
+            background: #f39c12;
+            color: white;
+        }
+
+        .message.final {
+            background: #27ae60;
+            color: white;
+        }
+
+        .message.error {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .chat-input {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #eee;
+        }
+
+        .chat-input form {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .chat-input button {
+            padding: 12px 20px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .chat-input button:hover {
+            background: #229954;
+        }
+
+        .status-bar {
+            padding: 10px 20px;
+            background: #ecf0f1;
+            border-top: 1px solid #ddd;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        .vnc-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .example-commands {
+            background: #34495e;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+
+        .example-commands h3 {
+            margin-bottom: 10px;
+            color: #3498db;
+        }
+
+        .example-commands ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .example-commands li {
+            padding: 5px 0;
+            color: #bdc3c7;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Panel: Info and Examples -->
+        <div class="left-panel">
+            <div class="header">Computer Use Agent</div>
+            
+            <div class="info-panel">
+                <h2>Welcome! 🚀</h2>
+                <p>This is a simple chat interface for the Computer Use Agent.</p>
+                <p>Just type your commands in the chat and watch them execute!</p>
+                
+                <div class="example-commands">
+                    <h3>Try These Commands:</h3>
+                    <ul>
+                        <li>• "open browser"</li>
+                        <li>• "take screenshot"</li>
+                        <li>• "open terminal"</li>
+                        <li>• "click mouse"</li>
+                        <li>• Any custom command</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel: Chat and VNC -->
+        <div class="right-panel">
+            <!-- Chat Area -->
+            <div class="chat-area">
+                <div class="header">Chat Interface</div>
+                
+                <!-- Messages -->
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message assistant">
+                        Welcome! Type any command and I'll execute it for you. Try "open browser" or "take screenshot"!
+                    </div>
+                </div>
+                
+                <!-- Chat Input -->
+                <div class="chat-input">
+                    <form id="chatForm" onsubmit="sendCommand(event)">
+                        <input type="text" id="messageInput" placeholder="Type your command..." required>
+                        <button type="submit">Send</button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- VNC Area -->
+            <div class="vnc-area">
+                <iframe id="vncFrame" class="vnc-frame" src="http://localhost:6080/vnc.html?view_only=1&autoconnect=1&resize=scale"></iframe>
+            </div>
+            
+            <!-- Status Bar -->
+            <div class="status-bar">
+                <span id="connectionStatus">Disconnected</span> | 
+                <span id="statusText">Ready to execute commands</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let websocket = null;
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            connectWebSocket();
+        });
+
+        // Connect WebSocket for real-time updates
+        function connectWebSocket() {
+            websocket = new WebSocket('ws://localhost:8000/ws');
+            
+            websocket.onopen = function() {
+                document.getElementById('connectionStatus').textContent = 'Connected';
+                document.getElementById('statusText').textContent = 'Ready to execute commands';
+                console.log('WebSocket connected');
+            };
+            
+            websocket.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                displayMessage(data);
+            };
+            
+            websocket.onclose = function() {
+                document.getElementById('connectionStatus').textContent = 'Disconnected';
+                document.getElementById('statusText').textContent = 'Connection lost';
+                console.log('WebSocket disconnected');
+                // Try to reconnect after 3 seconds
+                setTimeout(connectWebSocket, 3000);
+            };
+            
+            websocket.onerror = function(error) {
+                console.error('WebSocket error:', error);
+                document.getElementById('connectionStatus').textContent = 'Error';
+            };
+        }
+
+        // Send a command
+        async function sendCommand(event) {
+            event.preventDefault();
+            
+            const messageInput = document.getElementById('messageInput');
+            const command = messageInput.value.trim();
+            
+            if (!command) return;
+
+            // Display user command
+            displayMessage({
+                type: 'user_message',
+                content: command,
+                timestamp: new Date().toISOString()
+            });
+
+            // Clear input
+            messageInput.value = '';
+
+            // Send command via WebSocket
+            if (websocket && websocket.readyState === WebSocket.OPEN) {
+                websocket.send(JSON.stringify({
+                    type: 'command',
+                    content: command
+                }));
+            } else {
+                displayMessage({
+                    type: 'error',
+                    content: 'WebSocket not connected. Please wait...',
+                    timestamp: new Date().toISOString()
+                });
+            }
+        }
+
+        // Display a message in the chat
+        function displayMessage(data) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            
+            let content = '';
+            let className = 'message ';
+            
+            switch (data.type) {
+                case 'user_message':
+                    className += 'user';
+                    content = data.content;
+                    break;
+                case 'progress':
+                    className += 'progress';
+                    content = `🔄 ${data.text}`;
+                    break;
+                case 'final':
+                    className += 'final';
+                    content = `✅ ${data.text}`;
+                    break;
+                case 'error':
+                    className += 'error';
+                    content = data.content;
+                    break;
+                default:
+                    className += 'assistant';
+                    content = JSON.stringify(data);
+            }
+            
+            messageDiv.className = className;
+            messageDiv.innerHTML = `
+                <div>${content}</div>
+                <div style="font-size: 10px; color: #7f8c8d; margin-top: 5px;">
+                    ${new Date(data.ts || data.timestamp).toLocaleTimeString()}
+                </div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    </script>
+</body>
+</html>

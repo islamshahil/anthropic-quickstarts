@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  # Computer Use Demo (existing system)
+  computer-use-demo:
+    image: ghcr.io/anthropics/anthropic-quickstarts:computer-use-demo-latest
+    container_name: computer-use-demo
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - DISPLAY_NUM=1
+      - HEIGHT=768
+      - WIDTH=1024
+    ports:
+      - "5900:5900"    # VNC direct connection
+      - "6080:6080"    # noVNC web client
+      - "8080:8080"    # Main HTTP interface
+      - "8501:8501"    # Streamlit (legacy)
+    volumes:
+      - ./computer_use_demo:/home/computeruse/computer_use_demo/
+      - ${HOME}/.anthropic:/home/computeruse/.anthropic
+    networks:
+      - computer-use-network
+
+  # FastAPI Backend (new system)
+  fastapi-backend:
+    image: python:3.11-slim
+    container_name: fastapi-backend
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    ports:
+      - "8000:8000"    # FastAPI backend
+    volumes:
+      - ./fastapi_backend:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    working_dir: /app
+    networks:
+      - computer-use-network
+    command: >
+      bash -c "pip install -r requirements.txt &&
+               uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+
+networks:
+  computer-use-network:
+    driver: bridge
